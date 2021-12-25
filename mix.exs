@@ -21,7 +21,9 @@ defmodule FEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+      {:httpoison, "~> 1.7"},
+      {:jason, "~> 1.2"}
     ]
   end
 end
