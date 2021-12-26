@@ -14,9 +14,19 @@ defmodule FEx.APIs.FixerTest do
       assert FEx.APIs.Fixer.rate(:GBP, :EUR) == {:ok, %{from: :GBP, to: :EUR}}
     end
 
-    @moduletag :fixer_api
+    @tag :fixer_api
     test "hits api" do
       assert false
+    end
+  end
+
+  describe "symbols/0" do
+    test "returns list of currency symbols" do
+      expect(FEx.APIs.Fixer.Mock, :symbols, fn ->
+        {:ok, ["GBP"]}
+      end)
+
+      assert FEx.APIs.Fixer.symbols() == {:ok, ["GBP"]}
     end
   end
 end

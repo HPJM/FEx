@@ -21,6 +21,24 @@ defmodule FEx.APIs.Fixer.HTTPClient do
     end
   end
 
+  @impl true
+  def symbols do
+    with {:ok, response} <-
+           "/symbols"
+           |> get([], params: [access_key: System.get_env("API_KEY")])
+           |> maybe_decode() do
+      handle_symbols(response)
+    end
+  end
+
+  defp handle_symbols(%{body: %{"symbols" => symbols}}) do
+    {:ok, symbols |> Map.keys() |> Enum.sort()}
+  end
+
+  defp handle_symbols(response) do
+    {:error, {:invalid_data, response}}
+  end
+
   defp format(:rate, from, to, %{body: %{"rates" => rates}}) do
     {:ok, %{from: from, to: to, rate: rates["#{to}"]}}
   end
