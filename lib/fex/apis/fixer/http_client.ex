@@ -22,6 +22,16 @@ defmodule FEx.APIs.Fixer.HTTPClient do
   end
 
   @impl true
+  def rates(from) do
+    with {:ok, response} <-
+           "/latest"
+           |> get([], params: [access_key: System.get_env("API_KEY"), base: from])
+           |> maybe_decode() do
+      format(:rates, from, response)
+    end
+  end
+
+  @impl true
   def symbols do
     with {:ok, response} <-
            "/symbols"
@@ -44,6 +54,16 @@ defmodule FEx.APIs.Fixer.HTTPClient do
   end
 
   defp format(:rate, _from, _to, response) do
+    {:error, {:invalid_data, response}}
+  end
+
+  defp format(:rates, from, %{body: %{"rates" => rates}}) do
+    # TODO: allowlist for currencies
+    rates_list = for {to, rate} <- rates, do: %{from: from, to: String.to_atom(to), rate: rate}
+    {:ok, rates_list}
+  end
+
+  defp format(:rates, _from, response) do
     {:error, {:invalid_data, response}}
   end
 

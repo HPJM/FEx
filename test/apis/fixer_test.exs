@@ -23,6 +23,27 @@ defmodule FEx.APIs.FixerTest do
     end
   end
 
+  describe "rates/1" do
+    test "returns rates from base currency" do
+      expected = [%{from: :VND, to: :EUR, rate: 2.0}, %{from: :VND, to: :GBP, rate: 2.0}]
+
+      expect(FEx.APIs.Fixer.Mock, :rates, fn :VND ->
+        {:ok, expected}
+      end)
+
+      assert FEx.APIs.Fixer.rates(:VND) == {:ok, expected}
+    end
+
+    @tag :fixer_api
+    test "returns correct data from api" do
+      assert {:ok, rates} = FEx.APIs.Fixer.HTTPClient.rates(:VND)
+
+      for rate <- rates do
+        assert rate.from == :VND and is_number(rate.rate)
+      end
+    end
+  end
+
   describe "symbols/0" do
     test "returns list of currency symbols" do
       expect(FEx.APIs.Fixer.Mock, :symbols, fn ->
