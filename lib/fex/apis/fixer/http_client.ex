@@ -59,8 +59,12 @@ defmodule FEx.APIs.Fixer.HTTPClient do
     {:error, {:invalid_data, response}}
   end
 
-  defp handle_rate_response(from, to, %{body: %{"rates" => rates}}) do
-    {:ok, %{from: from, to: to, rate: rates["#{to}"]}}
+  defp handle_rate_response(from, to, response = %{body: %{"rates" => rates}}) do
+    if rate = Map.get(rates, "#{to}") do
+      {:ok, {from, to, rate}}
+    else
+      {:error, {:invalid_data, response}}
+    end
   end
 
   defp handle_rate_response(_from, _to, response) do
@@ -69,8 +73,8 @@ defmodule FEx.APIs.Fixer.HTTPClient do
 
   defp handle_rates_response(from, %{body: %{"rates" => rates}}) do
     # TODO: allowlist for currencies
-    rates_list = for {to, rate} <- rates, do: %{from: from, to: String.to_atom(to), rate: rate}
-    {:ok, rates_list}
+    rates_list = for {to, rate} <- rates, do: {String.to_atom(to), rate}
+    {:ok, {from, rates_list}}
   end
 
   defp handle_rates_response(_from, response) do
@@ -81,10 +85,9 @@ defmodule FEx.APIs.Fixer.HTTPClient do
     # TODO: allowlist for currencies
     only = Enum.map(only, &to_string/1)
 
-    rates_list =
-      for {to, rate} <- rates, to in only, do: %{from: from, to: String.to_atom(to), rate: rate}
+    rates_list = for {to, rate} <- rates, to in only, do: {String.to_atom(to), rate}
 
-    {:ok, rates_list}
+    {:ok, {from, rates_list}}
   end
 
   defp handle_rates_response(_from, _only, response) do
