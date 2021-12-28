@@ -7,6 +7,7 @@ defmodule FEx.APIs.Fixer do
 
   @callback rate(APIs.currency(), APIs.currency()) :: APIs.rate_response()
   @callback rates(APIs.currency()) :: APIs.rates_response()
+  @callback rates(APIs.currency(), APIs.only()) :: APIs.rates_response()
   @callback symbols() :: APIs.currency_response()
 
   @implementation Application.compile_env!(:fex, :fixer)
@@ -22,6 +23,12 @@ defmodule FEx.APIs.Fixer do
   """
   @impl true
   def rates(from), do: impl().rates(from)
+
+  @doc """
+  Determines rates from base currency `from` - filtered by `only`
+  """
+  @impl true
+  def rates(from, only), do: impl().rates(from, only)
 
   @doc """
   Returns list of available currency symbols.

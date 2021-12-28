@@ -32,6 +32,16 @@ defmodule FEx.APIs.Fixer.HTTPClient do
   end
 
   @impl true
+  def rates(from, only) do
+    with {:ok, response} <-
+           "/latest"
+           |> get([], params: make_params(base: from))
+           |> maybe_decode() do
+      handle_rates_response(from, only, response)
+    end
+  end
+
+  @impl true
   def symbols do
     with {:ok, response} <-
            "/symbols"
@@ -64,6 +74,20 @@ defmodule FEx.APIs.Fixer.HTTPClient do
   end
 
   defp handle_rates_response(_from, response) do
+    {:error, {:invalid_data, response}}
+  end
+
+  defp handle_rates_response(from, only, %{body: %{"rates" => rates}}) do
+    # TODO: allowlist for currencies
+    only = Enum.map(only, &to_string/1)
+
+    rates_list =
+      for {to, rate} <- rates, to in only, do: %{from: from, to: String.to_atom(to), rate: rate}
+
+    {:ok, rates_list}
+  end
+
+  defp handle_rates_response(_from, _only, response) do
     {:error, {:invalid_data, response}}
   end
 
