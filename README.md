@@ -4,6 +4,8 @@ Library to help with FX functionality. Intended to wrap various APIs, currently 
 
 Can be used either directly, or by `use`ing `FEx`.
 
+You will need to pass in `API_KEY` as an environment variable.
+
 ## Examples
 
 With `use`
